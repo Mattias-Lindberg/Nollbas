@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Nollbas – Solnas kommunala ekonomi granskat från grunden. Öppen data, öppen debatt." />
+  <title>Nollbas – Solna</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#0a0a0a" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Chart.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+
+  <style>
+    /* ── Reset & Tokens ─────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0a0a0a;
+      --surface:   #111111;
+      --border:    #1f1f1f;
+      --text:      #e8e8e8;
+      --muted:     #666;
+      --accent:    #c8f542;   /* sharp lime – civic energy */
+      --accent2:   #3b82f6;   /* data blue */
+      --danger:    #ef4444;
+      --font-head: 'Syne', sans-serif;
+      --font-mono: 'DM Mono', monospace;
+      --max:       1100px;
+      --radius:    4px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 14px;
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Lang toggle ────────────────────────────────────────── */
+    .lang-bar {
+      position: fixed;
+      top: 0; right: 0;
+      z-index: 100;
+      padding: 12px 20px;
+      display: flex;
+      gap: 12px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: .12em;
+    }
+
+    .lang-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      cursor: pointer;
+      padding: 4px 10px;
+      border-radius: var(--radius);
+      transition: all .2s;
+      font-family: inherit;
+      font-size: inherit;
+      letter-spacing: inherit;
+    }
+
+    .lang-btn.active,
+    .lang-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* ── Nav ────────────────────────────────────────────────── */
+    nav {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      z-index: 99;
+      border-bottom: 1px solid var(--border);
+      background: rgba(10,10,10,.92);
+      backdrop-filter: blur(12px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      height: 56px;
+    }
+
+    .nav-logo {
+      font-family: var(--font-head);
+      font-weight: 800;
+      font-size: 18px;
+      letter-spacing: -.02em;
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .nav-logo span { color: var(--accent); }
+
+    .nav-links {
+      display: flex;
+      gap: 28px;
+      list-style: none;
+      font-size: 11px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      padding-right: 80px; /* room for lang toggle */
+    }
+
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      transition: color .2s;
+    }
+
+    .nav-links a:hover { color: var(--accent); }
+
+    /* ── Layout helpers ─────────────────────────────────────── */
+    .container {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 0 32px;
+    }
+
+    section { padding: 100px 0; }
+
+    .label {
+      font-size: 10px;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+
+    h1, h2, h3 {
+      font-family: var(--font-head);
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    /* ── Hero ───────────────────────────────────────────────── */
+    #hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding-top: 56px;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* subtle grid background */
+    #hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 60px 60px;
+      opacity: .4;
+    }
+
+    .hero-inner {
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-inner h1 {
+      font-size: clamp(48px, 8vw, 96px);
+      letter-spacing: -.04em;
+      margin-bottom: 24px;
+      animation: fadeUp .8s ease both;
+    }
+
+    .hero-inner h1 em {
+      font-style: normal;
+      color: var(--accent);
+    }
+
+    .hero-sub {
+      max-width: 540px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.8;
+      margin-bottom: 40px;
+      animation: fadeUp .8s .15s ease both;
+    }
+
+    .hero-cta {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      animation: fadeUp .8s .3s ease both;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 12px 28px;
+      border-radius: var(--radius);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all .2s;
+      border: none;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #0a0a0a;
+      font-weight: 500;
+    }
+
+    .btn-primary:hover { background: #d4ff4a; }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* stat strip */
+    .stat-strip {
+      margin-top: 80px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1px;
+      border: 1px solid var(--border);
+      animation: fadeUp .8s .45s ease both;
+    }
+
+    .stat-item {
+      padding: 24px 28px;
+      border-right: 1px solid var(--border);
+    }
+
+    .stat-item:last-child { border-right: none; }
+
+    .stat-num {
+      font-family: var(--font-head);
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--accent);
+      display: block;
+    }
+
+    .stat-desc {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: .08em;
+    }
+
+    /* ── Data section ───────────────────────────────────────── */
+    #data { background: var(--surface); }
+
+    .section-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 48px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .section-head h2 { font-size: clamp(28px, 4vw, 44px); }
+
+    .source-tag {
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: .1em;
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: var(--radius);
+    }
+
+    .source-tag a { color: var(--accent2); text-decoration: none; }
+
+    .chart-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      border: 1px solid var(--border);
+    }
+
+    .chart-box {
+      background: var(--bg);
+      padding: 32px;
+      border-right: 1px solid var(--border);
+    }
+
+    .chart-box:nth-child(even) { border-right: none; }
+    .chart-box:nth-child(n+3) { border-top: 1px solid var(--border); }
+
+    .chart-title {
+      font-size: 11px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+
+    .chart-wrap { position: relative; height: 240px; }
+
+    /* loading state */
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: .1em;
+    }
+
+    .loading::after {
+      content: '';
+      width: 16px; height: 16px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+      margin-left: 10px;
+    }
+
+    /* ── Opinion / Analysis ─────────────────────────────────── */
+    #analysis { border-top: 1px solid var(--border); }
+
+    .posts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1px;
+      border: 1px solid var(--border);
+    }
+
+    .post-card {
+      background: var(--surface);
+      padding: 36px;
+      border-right: 1px solid var(--border);
+      transition: background .2s;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+
+    .post-card:hover { background: #161616; }
+
+    .post-tag {
+      font-size: 10px;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+
+    .post-card h3 {
+      font-size: 20px;
+      margin-bottom: 12px;
+      line-height: 1.3;
+    }
+
+    .post-card p {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .post-meta {
+      margin-top: 24px;
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: .08em;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    /* ── Discussion / Giscus ────────────────────────────────── */
+    #discussion { background: var(--surface); border-top: 1px solid var(--border); }
+
+    .giscus-wrap {
+      max-width: 760px;
+      margin-top: 40px;
+    }
+
+    .giscus-placeholder {
+      border: 1px dashed var(--border);
+      padding: 40px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    .giscus-placeholder code {
+      display: block;
+      margin-top: 16px;
+      font-size: 11px;
+      color: var(--accent);
+      background: var(--bg);
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      text-align: left;
+    }
+
+    /* ── About ──────────────────────────────────────────────── */
+    #about { border-top: 1px solid var(--border); }
+
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 64px;
+      align-items: start;
+    }
+
+    .about-meta {
+      border: 1px solid var(--border);
+      padding: 28px;
+    }
+
+    .about-meta-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+    }
+
+    .about-meta-row:last-child { border-bottom: none; }
+    .about-meta-row span:first-child { color: var(--muted); }
+    .about-meta-row span:last-child { color: var(--text); }
+
+    .about-text h2 { font-size: clamp(28px, 4vw, 44px); margin-bottom: 24px; }
+
+    .about-text p {
+      color: var(--muted);
+      line-height: 1.9;
+      margin-bottom: 16px;
+      font-size: 14px;
+    }
+
+    .about-text p strong { color: var(--text); }
+
+    /* ── Footer ─────────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: .08em;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--accent); }
+
+    /* ── Animations ─────────────────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ── i18n ───────────────────────────────────────────────── */
+    [data-lang="en"] { display: none; }
+    body.en [data-lang="sv"] { display: none; }
+    body.en [data-lang="en"] { display: inherit; }
+
+    /* ── Responsive ─────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .chart-grid { grid-template-columns: 1fr; }
+      .chart-box { border-right: none !important; border-top: 1px solid var(--border); }
+      .chart-box:first-child { border-top: none; }
+      .about-grid { grid-template-columns: 1fr; gap: 40px; }
+      nav { padding: 0 16px; }
+      .container { padding: 0 16px; }
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Lang toggle -->
+  <div class="lang-bar">
+    <button class="lang-btn active" onclick="setLang('sv')" id="btn-sv">SV</button>
+    <button class="lang-btn" onclick="setLang('en')" id="btn-en">EN</button>
+  </div>
+
+  <!-- Nav -->
+  <nav>
+    <a class="nav-logo" href="#hero">Klar<span>text</span></a>
+    <ul class="nav-links">
+      <li><a href="#data"       data-lang="sv">Data</a>       <a href="#data"       data-lang="en">Data</a></li>
+      <li><a href="#analysis"   data-lang="sv">Analys</a>     <a href="#analysis"   data-lang="en">Analysis</a></li>
+      <li><a href="#discussion" data-lang="sv">Diskussion</a> <a href="#discussion" data-lang="en">Discussion</a></li>
+      <li><a href="#about"      data-lang="sv">Om</a>         <a href="#about"      data-lang="en">About</a></li>
+    </ul>
+  </nav>
+
+  <!-- ── Hero ── -->
+  <section id="hero">
+    <div class="container hero-inner">
+      <p class="label" data-lang="sv">Solna Kommun · Öppen Data · Öppen Debatt</p>
+      <p class="label" data-lang="en">Solna Municipality · Open Data · Open Debate</p>
+
+      <h1 data-lang="sv">Pengarna.<br/>Besluten.<br/><em>Nollbas.</em></h1>
+      <h1 data-lang="en">The money.<br/>The decisions.<br/><em>Plain text.</em></h1>
+
+      <p class="hero-sub" data-lang="sv">
+        Solnas kommunala ekonomi i siffror — utan spin, utan partilinje.
+        Öppen data, öppen analys, öppen diskussion.
+      </p>
+      <p class="hero-sub" data-lang="en">
+        Solna's municipal finances in numbers — no spin, no party line.
+        Open data, open analysis, open debate.
+      </p>
+
+      <div class="hero-cta">
+        <a href="#data" class="btn btn-primary" data-lang="sv">Se datan</a>
+        <a href="#data" class="btn btn-primary" data-lang="en">Explore data</a>
+        <a href="#analysis" class="btn btn-outline" data-lang="sv">Läs analysen</a>
+        <a href="#analysis" class="btn btn-outline" data-lang="en">Read analysis</a>
+      </div>
+
+      <div class="stat-strip" id="stat-strip">
+        <div class="stat-item">
+          <span class="stat-num" id="stat-pop">–</span>
+          <span class="stat-desc" data-lang="sv">Invånare i Solna</span>
+          <span class="stat-desc" data-lang="en">Residents in Solna</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-num" id="stat-cost">–</span>
+          <span class="stat-desc" data-lang="sv">Kr/inv · Nettokostnad</span>
+          <span class="stat-desc" data-lang="en">SEK/capita · Net cost</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-num" id="stat-school">–</span>
+          <span class="stat-desc" data-lang="sv">Kr/elev · Grundskola</span>
+          <span class="stat-desc" data-lang="en">SEK/pupil · Primary school</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-num" data-lang="sv">290</span>
+          <span class="stat-num" data-lang="en">290</span>
+          <span class="stat-desc" data-lang="sv">Kommuner jämförs</span>
+          <span class="stat-desc" data-lang="en">Municipalities compared</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Data ── -->
+  <section id="data">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <p class="label" data-lang="sv">Kommunal ekonomi</p>
+          <p class="label" data-lang="en">Municipal finances</p>
+          <h2 data-lang="sv">Solna i siffror</h2>
+          <h2 data-lang="en">Solna in numbers</h2>
+        </div>
+        <span class="source-tag">
+          <span data-lang="sv">Källa: </span>
+          <span data-lang="en">Source: </span>
+          <a href="https://www.kolada.se" target="_blank">Kolada / SKR</a>
+        </span>
+      </div>
+
+      <div class="chart-grid">
+        <!-- Chart 1: Net cost per capita vs comparable kommuner -->
+        <div class="chart-box">
+          <p class="chart-title" data-lang="sv">Nettokostnad kr/inv — Jämförelse</p>
+          <p class="chart-title" data-lang="en">Net cost SEK/capita — Comparison</p>
+          <div class="chart-wrap">
+            <div class="loading" id="load1" data-lang="sv">Hämtar data</div>
+            <div class="loading" id="load1-en" data-lang="en" style="display:none">Fetching data</div>
+            <canvas id="chart1" style="display:none"></canvas>
+          </div>
+        </div>
+
+        <!-- Chart 2: School cost per pupil -->
+        <div class="chart-box">
+          <p class="chart-title" data-lang="sv">Grundskola kr/elev — Trend Solna</p>
+          <p class="chart-title" data-lang="en">Primary school SEK/pupil — Solna trend</p>
+          <div class="chart-wrap">
+            <div class="loading" id="load2" data-lang="sv">Hämtar data</div>
+            <div class="loading" id="load2-en" data-lang="en" style="display:none">Fetching data</div>
+            <canvas id="chart2" style="display:none"></canvas>
+          </div>
+        </div>
+
+        <!-- Chart 3: Admin overhead -->
+        <div class="chart-box">
+          <p class="chart-title" data-lang="sv">Politisk organisation kr/inv</p>
+          <p class="chart-title" data-lang="en">Political organisation SEK/capita</p>
+          <div class="chart-wrap">
+            <div class="loading" id="load3" data-lang="sv">Hämtar data</div>
+            <div class="loading" id="load3-en" data-lang="en" style="display:none">Fetching data</div>
+            <canvas id="chart3" style="display:none"></canvas>
+          </div>
+        </div>
+
+        <!-- Chart 4: Elderly care -->
+        <div class="chart-box">
+          <p class="chart-title" data-lang="sv">Äldreomsorg kr/inv 65+</p>
+          <p class="chart-title" data-lang="en">Elderly care SEK/capita 65+</p>
+          <div class="chart-wrap">
+            <div class="loading" id="load4" data-lang="sv">Hämtar data</div>
+            <div class="loading" id="load4-en" data-lang="en" style="display:none">Fetching data</div>
+            <canvas id="chart4" style="display:none"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Analysis ── -->
+  <section id="analysis">
+    <div class="container">
+      <p class="label" data-lang="sv">Analys & Åsikt</p>
+      <p class="label" data-lang="en">Analysis & Opinion</p>
+      <h2 style="font-size:clamp(28px,4vw,44px); margin-bottom:48px" data-lang="sv">Vad säger siffrorna?</h2>
+      <h2 style="font-size:clamp(28px,4vw,44px); margin-bottom:48px" data-lang="en">What do the numbers say?</h2>
+
+      <div class="posts-grid">
+        <a href="#" class="post-card">
+          <p class="post-tag" data-lang="sv">Analys · Budget</p>
+          <p class="post-tag" data-lang="en">Analysis · Budget</p>
+          <h3 data-lang="sv">Varför kostar Solnas administration mer än snittet?</h3>
+          <h3 data-lang="en">Why does Solna's administration cost more than average?</h3>
+          <p data-lang="sv">En genomgång av Solnas administrationskostnader per invånare jämfört med liknande kommuner. Siffrorna talar ett tydligt språk.</p>
+          <p data-lang="en">A review of Solna's administration costs per capita compared to similar municipalities. The numbers speak clearly.</p>
+          <div class="post-meta">
+            <span>2025 · Kolada N07403</span>
+            <span data-lang="sv">Läs →</span>
+            <span data-lang="en">Read →</span>
+          </div>
+        </a>
+
+        <a href="#" class="post-card">
+          <p class="post-tag" data-lang="sv">Analys · Skola</p>
+          <p class="post-tag" data-lang="en">Analysis · School</p>
+          <h3 data-lang="sv">Grundskolan: mer pengar, bättre resultat?</h3>
+          <h3 data-lang="en">Primary school: more money, better results?</h3>
+          <p data-lang="sv">Korrelationen mellan kostnader per elev och faktiska kunskapsresultat i Solnas grundskolor de senaste 10 åren.</p>
+          <p data-lang="en">The correlation between cost per pupil and actual learning outcomes in Solna's primary schools over the last 10 years.</p>
+          <div class="post-meta">
+            <span>2025 · Kolada N15033</span>
+            <span data-lang="sv">Läs →</span>
+            <span data-lang="en">Read →</span>
+          </div>
+        </a>
+
+        <a href="#" class="post-card">
+          <p class="post-tag" data-lang="sv">Åsikt</p>
+          <p class="post-tag" data-lang="en">Opinion</p>
+          <h3 data-lang="sv">Budgetposter som aldrig ifrågasätts — men borde</h3>
+          <h3 data-lang="en">Budget lines that are never questioned — but should be</h3>
+          <p data-lang="sv">Kommunal budgetering tenderar att förnyas automatiskt. Det är ett strukturellt problem som kostar Solnaborna miljoner varje år.</p>
+          <p data-lang="en">Municipal budgeting tends to auto-renew. It's a structural problem costing Solna residents millions every year.</p>
+          <div class="post-meta">
+            <span>2025</span>
+            <span data-lang="sv">Läs →</span>
+            <span data-lang="en">Read →</span>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Discussion ── -->
+  <section id="discussion">
+    <div class="container">
+      <p class="label" data-lang="sv">Öppen diskussion</p>
+      <p class="label" data-lang="en">Open discussion</p>
+      <h2 style="font-size:clamp(28px,4vw,44px)" data-lang="sv">Vad tycker du?</h2>
+      <h2 style="font-size:clamp(28px,4vw,44px)" data-lang="en">What do you think?</h2>
+
+      <div class="giscus-wrap">
+        <!--
+          SETUP GISCUS:
+          1. Go to https://giscus.app
+          2. Enter your GitHub repo name
+          3. Enable GitHub Discussions on the repo
+          4. Replace this placeholder with the <script> tag from giscus.app
+        -->
+        <div class="giscus-placeholder">
+          <span data-lang="sv">Diskussion via GitHub Discussions — aktiveras när repot är live.</span>
+          <span data-lang="en">Discussion via GitHub Discussions — activates once the repo is live.</span>
+          <code>
+            &lt;!-- Replace with your giscus.app script tag --&gt;<br/>
+            &lt;script src="https://giscus.app/client.js"<br/>
+            &nbsp;&nbsp;data-repo="mattiaslindberg/nollbas"<br/>
+            &nbsp;&nbsp;data-mapping="pathname"<br/>
+            &nbsp;&nbsp;data-theme="dark"<br/>
+            &nbsp;&nbsp;...&gt;&lt;/script&gt;
+          </code>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── About ── -->
+  <section id="about">
+    <div class="container">
+      <div class="about-grid">
+        <div class="about-meta">
+          <div class="about-meta-row">
+            <span data-lang="sv">Namn</span>
+            <span data-lang="en">Name</span>
+            <span>Mattias Lindberg</span>
+          </div>
+          <div class="about-meta-row">
+            <span data-lang="sv">Fokus</span>
+            <span data-lang="en">Focus</span>
+            <span>Solna Kommun</span>
+          </div>
+          <div class="about-meta-row">
+            <span data-lang="sv">Parti</span>
+            <span data-lang="en">Party</span>
+            <span>Moderaterna</span>
+          </div>
+          <div class="about-meta-row">
+            <span data-lang="sv">Kod</span>
+            <span data-lang="en">Code</span>
+            <a href="https://github.com/mattiaslindberg/nollbas" target="_blank" style="color:var(--accent2)">GitHub →</a>
+          </div>
+          <div class="about-meta-row">
+            <span data-lang="sv">Data</span>
+            <span data-lang="en">Data</span>
+            <a href="https://www.kolada.se" target="_blank" style="color:var(--accent2)">Kolada →</a>
+          </div>
+        </div>
+
+        <div class="about-text">
+          <p class="label" data-lang="sv">Om projektet</p>
+          <p class="label" data-lang="en">About</p>
+          <h2 data-lang="sv">Inte ett partiprojekt.<br/>Ett ansvarsprojekt.</h2>
+          <h2 data-lang="en">Not a party project.<br/>An accountability project.</h2>
+          <p data-lang="sv">
+            Nollbas är ett oberoende initiativ för att göra Solnas kommunala ekonomi begriplig för vanliga människor.
+            <strong>All data är offentlig.</strong> All kod är öppen. Alla påståenden har en källa.
+          </p>
+          <p data-lang="en">
+            Nollbas is an independent initiative to make Solna's municipal finances understandable for ordinary people.
+            <strong>All data is public.</strong> All code is open. Every claim has a source.
+          </p>
+          <p data-lang="sv">
+            Jag tror på öppenhet, inte slöseri. På samhällsnytta, inte budgetpositions-förnyelse för sakens skull.
+            Det finns en person bakom de här siffrorna — och den personen är lätt att hitta om du letar.
+          </p>
+          <p data-lang="en">
+            I believe in openness, not waste. In public value, not auto-renewed budget lines for their own sake.
+            There's a person behind these numbers — and that person is easy to find if you look.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <span>Nollbas · Solna · <a href="https://www.kolada.se" target="_blank">Kolada</a></span>
+    <span data-lang="sv">All data är offentlig · All kod är öppen</span>
+    <span data-lang="en">All data is public · All code is open</span>
+    <a href="https://github.com/mattiaslindberg/nollbas" target="_blank">GitHub →</a>
+  </footer>
+
+  <script>
+    /* ── Language toggle ──────────────────────────────────── */
+    function setLang(lang) {
+      document.body.classList.toggle('en', lang === 'en');
+      document.getElementById('btn-sv').classList.toggle('active', lang === 'sv');
+      document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+      localStorage.setItem('nollbas-lang', lang);
+    }
+
+    // Restore preference
+    const saved = localStorage.getItem('nollbas-lang');
+    if (saved === 'en') setLang('en');
+
+    /* ── Chart defaults ───────────────────────────────────── */
+    const C = {
+      accent:  '#c8f542',
+      accent2: '#3b82f6',
+      muted:   '#444',
+      text:    '#888',
+      bg:      '#0a0a0a',
+      grid:    '#1a1a1a',
+    };
+
+    Chart.defaults.color = C.text;
+    Chart.defaults.font.family = "'DM Mono', monospace";
+    Chart.defaults.font.size = 11;
+
+    const baseOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#111',
+          borderColor: '#1f1f1f',
+          borderWidth: 1,
+          titleColor: C.accent,
+          bodyColor: '#aaa',
+        }
+      },
+      scales: {
+        x: { grid: { color: C.grid }, ticks: { color: C.text } },
+        y: { grid: { color: C.grid }, ticks: { color: C.text } }
+      }
+    };
+
+    /* ── Kolada API helper ────────────────────────────────── */
+    // Returns values for a given KPI and municipality (Solna = 1281)
+    async function kolada(kpi, municipality = '1281') {
+      const url = `https://api.kolada.se/v2/data/kpi/${kpi}/municipality/${municipality}`;
+      const res = await fetch(url);
+      const json = await res.json();
+      // Each value object: { period, values: [{gender:'T', value}] }
+      return json.values
+        .map(v => ({
+          year: v.period,
+          value: v.values.find(x => x.gender === 'T')?.value ?? null
+        }))
+        .filter(v => v.value !== null)
+        .sort((a, b) => a.year - b.year);
+    }
+
+    // Fetch one value for multiple municipalities
+    async function koladaMulti(kpi, municipalities) {
+      const ids = municipalities.join(',');
+      const url = `https://api.kolada.se/v2/data/kpi/${kpi}/municipality/${ids}`;
+      const res = await fetch(url);
+      const json = await res.json();
+      // Return latest year per municipality
+      const map = {};
+      json.values.forEach(v => {
+        const val = v.values.find(x => x.gender === 'T')?.value;
+        if (val == null) return;
+        if (!map[v.municipality_id] || v.period > map[v.municipality_id].year) {
+          map[v.municipality_id] = { year: v.period, value: val };
+        }
+      });
+      return map;
+    }
+
+    function showChart(loadId, canvasId) {
+      document.getElementById(loadId).style.display = 'none';
+      if (document.getElementById(loadId + '-en'))
+        document.getElementById(loadId + '-en').style.display = 'none';
+      document.getElementById(canvasId).style.display = 'block';
+    }
+
+    /* ── Chart 1: Net cost comparison ────────────────────── */
+    // KPI N07403 = Nettokostnad totalt, kr/inv
+    // Compare Solna vs Stockholm vs Sundbyberg vs Nacka vs rikssnitt
+    async function renderChart1() {
+      try {
+        const munis = {
+          '1281': 'Solna',
+          '0180': 'Stockholm',
+          '0183': 'Sundbyberg',
+          '0182': 'Nacka',
+        };
+        const data = await koladaMulti('N07403', Object.keys(munis));
+        const labels = Object.values(munis);
+        const values = Object.keys(munis).map(id => data[id]?.value ?? 0);
+
+        showChart('load1', 'chart1');
+        new Chart(document.getElementById('chart1'), {
+          type: 'bar',
+          data: {
+            labels,
+            datasets: [{
+              data: values,
+              backgroundColor: labels.map(l => l === 'Solna' ? C.accent : C.muted),
+              borderRadius: 2,
+            }]
+          },
+          options: {
+            ...baseOptions,
+            scales: {
+              ...baseOptions.scales,
+              y: {
+                ...baseOptions.scales.y,
+                ticks: {
+                  ...baseOptions.scales.y.ticks,
+                  callback: v => (v / 1000).toFixed(0) + 'k'
+                }
+              }
+            }
+          }
+        });
+
+        // Update hero stat
+        const solnaVal = data['1281']?.value;
+        if (solnaVal) document.getElementById('stat-cost').textContent =
+          (solnaVal / 1000).toFixed(0) + 'k';
+      } catch(e) {
+        document.getElementById('load1').textContent = 'Data ej tillgänglig';
+      }
+    }
+
+    /* ── Chart 2: School cost trend ──────────────────────── */
+    // KPI N15033 = Nettokostnad grundskola kr/elev
+    async function renderChart2() {
+      try {
+        const series = await kolada('N15033', '1281');
+        const recent = series.slice(-8);
+
+        showChart('load2', 'chart2');
+        new Chart(document.getElementById('chart2'), {
+          type: 'line',
+          data: {
+            labels: recent.map(d => d.year),
+            datasets: [{
+              data: recent.map(d => d.value),
+              borderColor: C.accent2,
+              backgroundColor: C.accent2 + '22',
+              fill: true,
+              tension: 0.3,
+              pointRadius: 3,
+              pointBackgroundColor: C.accent2,
+            }]
+          },
+          options: {
+            ...baseOptions,
+            scales: {
+              ...baseOptions.scales,
+              y: {
+                ...baseOptions.scales.y,
+                ticks: {
+                  callback: v => (v / 1000).toFixed(0) + 'k'
+                }
+              }
+            }
+          }
+        });
+
+        const latest = series.at(-1)?.value;
+        if (latest) document.getElementById('stat-school').textContent =
+          (latest / 1000).toFixed(0) + 'k';
+      } catch(e) {
+        document.getElementById('load2').textContent = 'Data ej tillgänglig';
+      }
+    }
+
+    /* ── Chart 3: Political admin cost ───────────────────── */
+    // KPI N03007 = Kostnad politisk organisation kr/inv
+    async function renderChart3() {
+      try {
+        const munis = {
+          '1281': 'Solna',
+          '0180': 'Stockholm',
+          '0183': 'Sundbyberg',
+          '0182': 'Nacka',
+          '0184': 'Sollentuna',
+        };
+        const data = await koladaMulti('N03007', Object.keys(munis));
+        const labels = Object.values(munis);
+        const values = Object.keys(munis).map(id => data[id]?.value ?? 0);
+
+        showChart('load3', 'chart3');
+        new Chart(document.getElementById('chart3'), {
+          type: 'bar',
+          data: {
+            labels,
+            datasets: [{
+              data: values,
+              backgroundColor: labels.map(l => l === 'Solna' ? C.accent : C.muted),
+              borderRadius: 2,
+            }]
+          },
+          options: baseOptions
+        });
+      } catch(e) {
+        document.getElementById('load3').textContent = 'Data ej tillgänglig';
+      }
+    }
+
+    /* ── Chart 4: Elderly care cost ──────────────────────── */
+    // KPI N17006 = Nettokostnad äldreomsorg kr/inv 65+
+    async function renderChart4() {
+      try {
+        const series = await kolada('N17006', '1281');
+        const recent = series.slice(-8);
+
+        showChart('load4', 'chart4');
+        new Chart(document.getElementById('chart4'), {
+          type: 'line',
+          data: {
+            labels: recent.map(d => d.year),
+            datasets: [{
+              data: recent.map(d => d.value),
+              borderColor: C.accent,
+              backgroundColor: C.accent + '18',
+              fill: true,
+              tension: 0.3,
+              pointRadius: 3,
+              pointBackgroundColor: C.accent,
+            }]
+          },
+          options: {
+            ...baseOptions,
+            scales: {
+              ...baseOptions.scales,
+              y: {
+                ...baseOptions.scales.y,
+                ticks: {
+                  callback: v => (v / 1000).toFixed(0) + 'k'
+                }
+              }
+            }
+          }
+        });
+      } catch(e) {
+        document.getElementById('load4').textContent = 'Data ej tillgänglig';
+      }
+    }
+
+    /* ── Population stat ─────────────────────────────────── */
+    // KPI N01951 = Folkmängd totalt
+    async function fetchPop() {
+      try {
+        const series = await kolada('N01951', '1281');
+        const latest = series.at(-1)?.value;
+        if (latest) document.getElementById('stat-pop').textContent =
+          latest.toLocaleString('sv-SE');
+      } catch(e) {}
+    }
+
+    /* ── Init ─────────────────────────────────────────────── */
+    fetchPop();
+    renderChart1();
+    renderChart2();
+    renderChart3();
+    renderChart4();
+  </script>
+</body>
+</html>
