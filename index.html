@@ -833,34 +833,37 @@
     };
 
     /* ── Kolada API helper ────────────────────────────────── */
-    // Returns values for a given KPI and municipality (Solna = 1281)
+    // Extract numeric value — gender T first, fallback to first entry
+    function extractVal(arr) {
+      if (!Array.isArray(arr) || arr.length === 0) return null;
+      const t = arr.find(x => x.gender === 'T') ?? arr[0];
+      return (t && t.value != null && t.value !== '') ? Number(t.value) : null;
+    }
+
+    // Returns time series for a given KPI and single municipality (Solna = 1281)
     async function kolada(kpi, municipality = '1281') {
       const url = `https://api.kolada.se/v2/data/kpi/${kpi}/municipality/${municipality}`;
       const res = await fetch(url);
       const json = await res.json();
-      // Each value object: { period, values: [{gender:'T', value}] }
-      return json.values
-        .map(v => ({
-          year: v.period,
-          value: v.values.find(x => x.gender === 'T')?.value ?? null
-        }))
-        .filter(v => v.value !== null)
-        .sort((a, b) => a.year - b.year);
+      return (json.values || [])
+        .map(v => ({ year: String(v.period), value: extractVal(v.values) }))
+        .filter(v => v.value !== null && v.value > 0)
+        .sort((a, b) => a.year.localeCompare(b.year));
     }
 
-    // Fetch one value for multiple municipalities
+    // Fetch latest value for multiple municipalities
     async function koladaMulti(kpi, municipalities) {
       const ids = municipalities.join(',');
       const url = `https://api.kolada.se/v2/data/kpi/${kpi}/municipality/${ids}`;
       const res = await fetch(url);
       const json = await res.json();
-      // Return latest year per municipality
       const map = {};
-      json.values.forEach(v => {
-        const val = v.values.find(x => x.gender === 'T')?.value;
-        if (val == null) return;
-        if (!map[v.municipality_id] || v.period > map[v.municipality_id].year) {
-          map[v.municipality_id] = { year: v.period, value: val };
+      (json.values || []).forEach(v => {
+        const id = String(v.municipality_id ?? v.municipality ?? '');
+        const val = extractVal(v.values);
+        if (!id || val == null || val === 0) return;
+        if (!map[id] || Number(v.period) > Number(map[id].year)) {
+          map[id] = { year: String(v.period), value: val };
         }
       });
       return map;
@@ -884,7 +887,7 @@
           '0183': 'Sundbyberg',
           '0182': 'Nacka',
         };
-        const data = await koladaMulti('N07403', Object.keys(munis));
+        const data = await koladaMulti('N00914', Object.keys(munis));
         const labels = Object.values(munis);
         const values = Object.keys(munis).map(id => data[id]?.value ?? 0);
 
@@ -978,7 +981,7 @@
           '0182': 'Nacka',
           '0184': 'Sollentuna',
         };
-        const data = await koladaMulti('N03007', Object.keys(munis));
+        const data = await koladaMulti('N03703', Object.keys(munis));
         const labels = Object.values(munis);
         const values = Object.keys(munis).map(id => data[id]?.value ?? 0);
 
@@ -1004,7 +1007,7 @@
     // KPI N17006 = Nettokostnad äldreomsorg kr/inv 65+
     async function renderChart4() {
       try {
-        const series = await kolada('N17006', '1281');
+        const series = await kolada('N17800', '1281');
         const recent = series.slice(-8);
 
         showChart('load4', 'chart4');
@@ -1044,7 +1047,7 @@
     // KPI N01951 = Folkmängd totalt
     async function fetchPop() {
       try {
-        const series = await kolada('N01951', '1281');
+        const series = await kolada('N01001', '1281');
         const latest = series.at(-1)?.value;
         if (latest) document.getElementById('stat-pop').textContent =
           latest.toLocaleString('sv-SE');
