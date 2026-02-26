@@ -513,6 +513,7 @@
     <ul class="nav-links">
       <li><a href="#data"       data-lang="sv">Data</a>       <a href="#data"       data-lang="en">Data</a></li>
       <li><a href="#scb"        data-lang="sv">SCB-data</a>   <a href="#scb"        data-lang="en">SCB data</a></li>
+      <li><a href="#arsred"     data-lang="sv">Årsredovisning</a><a href="#arsred"     data-lang="en">Annual report</a></li>
       <li><a href="#analysis"   data-lang="sv">Analys</a>     <a href="#analysis"   data-lang="en">Analysis</a></li>
       <li><a href="#discussion" data-lang="sv">Diskussion</a> <a href="#discussion" data-lang="en">Discussion</a></li>
       <li><a href="#about"      data-lang="sv">Om</a>         <a href="#about"      data-lang="en">About</a></li>
@@ -710,6 +711,122 @@
             <strong style="color:var(--text);">Which Solna departments have grown without clear justification?</strong>
           </p>
         </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ── Årsredovisning ── -->
+  <section id="arsred" style="background:var(--bg); border-top:1px solid var(--border);">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <p class="label" data-lang="sv">Solna Stad · Delårsrapport Augusti 2025</p>
+          <p class="label" data-lang="en">Solna City · Interim Report August 2025</p>
+          <h2 data-lang="sv">Vad visar siffrorna egentligen?</h2>
+          <h2 data-lang="en">What do the numbers actually show?</h2>
+        </div>
+        <span class="source-tag">
+          <a href="https://www.solna.se" target="_blank">Solna Stad · Delårsrapport 2025</a>
+        </span>
+      </div>
+
+      <!-- Insight cards -->
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:1px; border:1px solid var(--border); margin-bottom:1px;">
+
+        <div style="background:var(--surface); padding:32px; border-right:1px solid var(--border);">
+          <p style="font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:#ef4444; margin-bottom:8px;">⚠ VARNINGSSIGNAL</p>
+          <p style="font-family:var(--font-head); font-size:36px; font-weight:800; color:#ef4444;">+75%</p>
+          <p style="font-size:13px; color:var(--muted); margin-top:8px; line-height:1.7;" data-lang="sv">
+            Konsulttjänster &amp; inhyrd personal ökade från <strong style="color:var(--text);">32,0 Mkr → 55,9 Mkr</strong> på ett år.
+            Ingen förklaring ges i rapporten.
+          </p>
+          <p style="font-size:13px; color:var(--muted); margin-top:8px; line-height:1.7;" data-lang="en">
+            Consultants &amp; hired staff increased from <strong style="color:var(--text);">32.0 → 55.9 MSEK</strong> in one year.
+            No explanation given in the report.
+          </p>
+        </div>
+
+        <div style="background:var(--surface); padding:32px; border-right:1px solid var(--border);">
+          <p style="font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:#f59e0b; margin-bottom:8px;">VÄRD ATT GRANSKA</p>
+          <p style="font-family:var(--font-head); font-size:36px; font-weight:800; color:#f59e0b;">+56%</p>
+          <p style="font-size:13px; color:var(--muted); margin-top:8px; line-height:1.7;" data-lang="sv">
+            Kommunstyrelsens nettokostnad ökade från <strong style="color:var(--text);">-103,4 → -161,1 Mkr</strong> år-över-år, jan–aug.
+            Trots det redovisar de +18,4 Mkr bättre än budget.
+          </p>
+          <p style="font-size:13px; color:var(--muted); margin-top:8px; line-height:1.7;" data-lang="en">
+            City executive board net cost grew from <strong style="color:var(--text);">103.4 → 161.1 MSEK</strong> year-on-year, Jan–Aug.
+            Yet they report +18.4 MSEK better than budget.
+          </p>
+        </div>
+
+        <div style="background:var(--surface); padding:32px;">
+          <p style="font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:#ef4444; margin-bottom:8px;">EXTRAORDINÄR KOSTNAD</p>
+          <p style="font-family:var(--font-head); font-size:36px; font-weight:800; color:#ef4444;">127,5 Mkr</p>
+          <p style="font-size:13px; color:var(--muted); margin-top:8px; line-height:1.7;" data-lang="sv">
+            Sverigeförhandlingen — riskavsättning ianspråktagen 2025 för tunnelbana Hagalund.
+            <strong style="color:var(--text);">Betalningar på 167 Mkr väntas 2026, 182 Mkr 2027.</strong>
+          </p>
+          <p style="font-size:13px; color:var(--muted); margin-top:8px; line-height:1.7;" data-lang="en">
+            Sweden Negotiation — risk provision used 2025 for Hagalund metro.
+            <strong style="color:var(--text);">Payments of 167 MSEK expected 2026, 182 MSEK 2027.</strong>
+          </p>
+        </div>
+      </div>
+
+      <!-- Chart grid -->
+      <div class="chart-grid">
+
+        <!-- Chart A: Nettokostnad per nämnd 2025 vs 2024 -->
+        <div class="chart-box">
+          <p class="chart-title" data-lang="sv">Nettokostnad per nämnd — 2025 vs 2024 (jan–aug, Mkr)</p>
+          <p class="chart-title" data-lang="en">Net cost per board — 2025 vs 2024 (Jan–Aug, MSEK)</p>
+          <div class="chart-wrap">
+            <canvas id="ar-chart1"></canvas>
+          </div>
+        </div>
+
+        <!-- Chart B: Budgetavvikelse per nämnd -->
+        <div class="chart-box">
+          <p class="chart-title" data-lang="sv">Budgetavvikelse per nämnd 2025 (Mkr, jan–aug vs helårsbudget)</p>
+          <p class="chart-title" data-lang="en">Budget deviation per board 2025 (MSEK, Jan–Aug vs full-year budget)</p>
+          <div class="chart-wrap">
+            <canvas id="ar-chart2"></canvas>
+          </div>
+        </div>
+
+        <!-- Chart C: Kostnadsutveckling — konsulter vs personal -->
+        <div class="chart-box">
+          <p class="chart-title" data-lang="sv">Konsulter &amp; inhyrd personal vs fast personal (Mkr)</p>
+          <p class="chart-title" data-lang="en">Consultants &amp; hired staff vs permanent staff (MSEK)</p>
+          <div class="chart-wrap">
+            <canvas id="ar-chart3"></canvas>
+          </div>
+        </div>
+
+        <!-- Chart D: Kostnadstyper fördelning -->
+        <div class="chart-box">
+          <p class="chart-title" data-lang="sv">Verksamhetskostnader fördelat på typ 2025 (Mkr)</p>
+          <p class="chart-title" data-lang="en">Operating costs by type 2025 (MSEK)</p>
+          <div class="chart-wrap">
+            <canvas id="ar-chart4"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Nollbas question box -->
+      <div style="margin-top:1px; border:1px solid var(--border); border-top:none; padding:28px 32px; background:var(--surface);">
+        <p style="font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--accent); margin-bottom:12px;">NOLLBAS-FRÅGAN</p>
+        <p data-lang="sv" style="font-size:15px; color:var(--text); line-height:1.8; max-width:780px;">
+          Konsultkostnaderna ökade med 75% på ett år. Antalet anställda förblev konstant (-1 134,9 vs -1 135,1 Mkr).
+          <strong>Vad köpte Solna stad för 23,9 Mkr extra i konsulttjänster — och varför behövdes det inte 2024?</strong>
+          Det är den fråga som en nämndledamot borde ställa. Det är den fråga som ingen hittills har ställt offentligt.
+        </p>
+        <p data-lang="en" style="font-size:15px; color:var(--text); line-height:1.8; max-width:780px;">
+          Consultant costs increased 75% in one year. Permanent headcount stayed flat.
+          <strong>What did Solna buy for 23.9 MSEK in extra consultancy — and why wasn't it needed in 2024?</strong>
+          That's the question a board member should ask. That's the question no one has asked publicly yet.
+        </p>
       </div>
     </div>
   </section>
@@ -1384,6 +1501,166 @@
         document.getElementById('scb-load4').textContent = 'Data ej tillgänglig';
       }
     }
+
+
+    /* ── Årsredovisning Charts (hardcoded from Solna delårsrapport aug 2025) ──
+     * Source: Solna Stad Delårsrapport per augusti 2025, Not 34 & Not 4
+     * ────────────────────────────────────────────────────────────────────── */
+
+    // Chart A: Nettokostnad per nämnd 2025 vs 2024 (jan-aug, Mkr)
+    (function() {
+      const namnder = ['Kommunstyrelsen','Skolnämnden','Omvårdnadsnämnden','Förskolenämnden','Socialnämnden','Kultur & Fritid','Tekniska n.','Kompetensnämnden'];
+      const data2024 = [103.4, 730.3, 624.0, 384.8, 138.2, 116.5, 20.5, 26.1];
+      const data2025 = [161.1, 805.2, 682.5, 416.6, 146.3, 122.6, 74.4, 17.5];
+
+      new Chart(document.getElementById('ar-chart1'), {
+        type: 'bar',
+        data: {
+          labels: namnder,
+          datasets: [
+            {
+              label: '2024',
+              data: data2024,
+              backgroundColor: C.muted,
+              borderRadius: 2,
+            },
+            {
+              label: '2025',
+              data: data2025,
+              backgroundColor: namnder.map((n,i) => {
+                // Highlight kommunstyrelsen as anomaly
+                if (n === 'Kommunstyrelsen') return '#ef4444';
+                return data2025[i] > data2024[i] * 1.1 ? C.accent : C.accent2;
+              }),
+              borderRadius: 2,
+            }
+          ]
+        },
+        options: {
+          ...baseOptions,
+          plugins: {
+            ...baseOptions.plugins,
+            legend: { display: true, labels: { color: C.text, font: { size: 10 }, boxWidth: 10 } }
+          },
+          scales: {
+            ...baseOptions.scales,
+            x: { ...baseOptions.scales.x, ticks: { color: C.text, font: { size: 9 } } },
+            y: { ...baseOptions.scales.y, ticks: { callback: v => v + ' Mkr' } }
+          }
+        }
+      });
+    })();
+
+    // Chart B: Budgetavvikelse per nämnd (positiv = bättre än budget)
+    (function() {
+      const namnder = ['Kommunstyrelsen','Skolnämnden','Omvårdnadsnämnden','Förskolenämnden','Kompetensnämnden','Kultur & Fritid','Socialnämnden','Tekniska n.','Byggnadsnämnden'];
+      const avvik   = [18.4, 24.3, 21.7, 13.4, 16.1, 12.6, 8.5, 3.6, 3.8];
+
+      new Chart(document.getElementById('ar-chart2'), {
+        type: 'bar',
+        data: {
+          labels: namnder,
+          datasets: [{
+            label: 'Budgetavvikelse Mkr (jan–aug)',
+            data: avvik,
+            backgroundColor: avvik.map(v => v > 15 ? C.accent : C.accent2),
+            borderRadius: 2,
+          }]
+        },
+        options: {
+          ...baseOptions,
+          plugins: {
+            ...baseOptions.plugins,
+            tooltip: {
+              ...baseOptions.plugins.tooltip,
+              callbacks: {
+                afterBody: (items) => {
+                  const v = items[0].raw;
+                  if (v > 15) return '⚠ Stor avvikelse — varför sattes budgeten så högt?';
+                  return '';
+                }
+              }
+            }
+          },
+          scales: {
+            ...baseOptions.scales,
+            x: { ...baseOptions.scales.x, ticks: { color: C.text, font: { size: 9 } } },
+            y: { ...baseOptions.scales.y, ticks: { callback: v => '+' + v + ' Mkr' } }
+          }
+        }
+      });
+    })();
+
+    // Chart C: Konsulter vs fast personal 2024 vs 2025
+    (function() {
+      new Chart(document.getElementById('ar-chart3'), {
+        type: 'bar',
+        data: {
+          labels: ['Fast personal', 'Konsulter & inhyrd'],
+          datasets: [
+            {
+              label: '2024',
+              data: [1135.1, 32.0],
+              backgroundColor: C.muted,
+              borderRadius: 2,
+            },
+            {
+              label: '2025',
+              data: [1134.9, 55.9],
+              backgroundColor: [C.accent2, '#ef4444'],
+              borderRadius: 2,
+            }
+          ]
+        },
+        options: {
+          ...baseOptions,
+          plugins: {
+            ...baseOptions.plugins,
+            legend: { display: true, labels: { color: C.text, font: { size: 10 }, boxWidth: 10 } }
+          },
+          scales: {
+            ...baseOptions.scales,
+            y: { ...baseOptions.scales.y, ticks: { callback: v => v + ' Mkr' } }
+          }
+        }
+      });
+    })();
+
+    // Chart D: Verksamhetskostnader fördelat på typ 2025
+    (function() {
+      const labels = ['Fast personal','Köp av verksamhet','Övriga kostnader','Avskrivningar','Konsulter/inhyrd','Lokalhyror','Lämnade bidrag'];
+      const values = [1134.9, 1380.1, 325.8, 177.6, 55.9, 48.5, 44.8];
+
+      new Chart(document.getElementById('ar-chart4'), {
+        type: 'doughnut',
+        data: {
+          labels,
+          datasets: [{
+            data: values,
+            backgroundColor: [C.accent2, C.accent, '#f59e0b', C.muted, '#ef4444', '#8b5cf6', '#06b6d4'],
+            borderColor: C.bg,
+            borderWidth: 2,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: true,
+              position: 'right',
+              labels: { color: C.text, font: { size: 9, family: "'DM Mono', monospace" }, boxWidth: 10, padding: 10 }
+            },
+            tooltip: {
+              ...baseOptions.plugins.tooltip,
+              callbacks: {
+                label: (item) => ` ${item.label}: ${item.raw} Mkr`
+              }
+            }
+          }
+        }
+      });
+    })();
 
     // Init SCB charts
     renderScbChart1();
