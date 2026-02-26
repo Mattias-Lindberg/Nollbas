@@ -509,9 +509,10 @@
 
   <!-- Nav -->
   <nav>
-    <a class="nav-logo" href="#hero">Klar<span>text</span></a>
+    <a class="nav-logo" href="#hero">Noll<span>bas</span></a>
     <ul class="nav-links">
       <li><a href="#data"       data-lang="sv">Data</a>       <a href="#data"       data-lang="en">Data</a></li>
+      <li><a href="#scb"        data-lang="sv">SCB-data</a>   <a href="#scb"        data-lang="en">SCB data</a></li>
       <li><a href="#analysis"   data-lang="sv">Analys</a>     <a href="#analysis"   data-lang="en">Analysis</a></li>
       <li><a href="#discussion" data-lang="sv">Diskussion</a> <a href="#discussion" data-lang="en">Discussion</a></li>
       <li><a href="#about"      data-lang="sv">Om</a>         <a href="#about"      data-lang="en">About</a></li>
@@ -629,6 +630,85 @@
             <div class="loading" id="load4-en" data-lang="en" style="display:none">Fetching data</div>
             <canvas id="chart4" style="display:none"></canvas>
           </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ── SCB Data ── -->
+  <section id="scb">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <p class="label" data-lang="sv">Verksamhetskostnader per område</p>
+          <p class="label" data-lang="en">Costs by service area</p>
+          <h2 data-lang="sv">Var går pengarna?</h2>
+          <h2 data-lang="en">Where does the money go?</h2>
+        </div>
+        <span class="source-tag">
+          <span data-lang="sv">Källa: </span>
+          <span data-lang="en">Source: </span>
+          <a href="https://www.scb.se/oe0107" target="_blank">SCB OE0107</a>
+        </span>
+      </div>
+
+      <div class="chart-grid">
+        <!-- SCB Chart 1: Costs by department Solna latest year -->
+        <div class="chart-box">
+          <p class="chart-title" data-lang="sv">Bruttokostnad per verksamhet — Solna</p>
+          <p class="chart-title" data-lang="en">Gross cost by service area — Solna</p>
+          <div class="chart-wrap">
+            <div class="loading" id="scb-load1">Hämtar SCB-data</div>
+            <canvas id="scb-chart1" style="display:none"></canvas>
+          </div>
+        </div>
+
+        <!-- SCB Chart 2: Cost growth per department trend -->
+        <div class="chart-box">
+          <p class="chart-title" data-lang="sv">Kostnadsutveckling per verksamhet — Solna</p>
+          <p class="chart-title" data-lang="en">Cost growth by service area — Solna</p>
+          <div class="chart-wrap">
+            <div class="loading" id="scb-load2">Hämtar SCB-data</div>
+            <canvas id="scb-chart2" style="display:none"></canvas>
+          </div>
+        </div>
+
+        <!-- SCB Chart 3: IFO cost comparison -->
+        <div class="chart-box">
+          <p class="chart-title" data-lang="sv">Individ- och familjeomsorg kr/inv — Jämförelse</p>
+          <p class="chart-title" data-lang="en">Social welfare cost SEK/capita — Comparison</p>
+          <div class="chart-wrap">
+            <div class="loading" id="scb-load3">Hämtar SCB-data</div>
+            <canvas id="scb-chart3" style="display:none"></canvas>
+          </div>
+        </div>
+
+        <!-- SCB Chart 4: Admin cost as % of total -->
+        <div class="chart-box">
+          <p class="chart-title" data-lang="sv">Administrationskostnad som % av totalt — Trend</p>
+          <p class="chart-title" data-lang="en">Admin cost as % of total — Trend</p>
+          <div class="chart-wrap">
+            <div class="loading" id="scb-load4">Hämtar SCB-data</div>
+            <canvas id="scb-chart4" style="display:none"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Zero-base insight box -->
+      <div style="margin-top:1px; border:1px solid var(--border); border-top:none; padding:28px 32px; background:var(--surface); display:flex; gap:24px; align-items:flex-start; flex-wrap:wrap;">
+        <div style="flex:0 0 auto;">
+          <span style="font-family:var(--font-head); font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--accent);">NOLLBAS-PRINCIPEN</span>
+        </div>
+        <div style="flex:1; min-width:260px;">
+          <p data-lang="sv" style="font-size:13px; color:var(--muted); line-height:1.8;">
+            Nollbasbudgetering innebär att varje budgetpost måste motiveras från noll — inte bara förra årets nivå plus inflation.
+            <strong style="color:var(--text);">Vilka verksamheter i Solna har växt utan tydlig motivering?</strong>
+          </p>
+          <p data-lang="en" style="font-size:13px; color:var(--muted); line-height:1.8;">
+            Zero-base budgeting means every budget line must be justified from scratch — not just last year's level plus inflation.
+            <strong style="color:var(--text);">Which Solna departments have grown without clear justification?</strong>
+          </p>
         </div>
       </div>
     </div>
@@ -1060,6 +1140,257 @@
     renderChart2();
     renderChart3();
     renderChart4();
+
+    /* ── SCB API ──────────────────────────────────────────────
+     * Table: KostnDR — Kostnader och intäkter för kommuner
+     *   efter region och verksamhetsområde
+     * API: PxWebApi v1 (POST with JSON query)
+     * Solna region code: 0163
+     * ─────────────────────────────────────────────────────── */
+
+    const SCB_URL = 'https://api.scb.se/OV0104/v1/doris/sv/ssd/START/OE/OE0107/OE0107B/KostnDR';
+
+    // Verksamhetsområden vi bryr oss om
+    const VERKS = {
+      '11': 'Förskola',
+      '12': 'Grundskola',
+      '16': 'Gymnasieskola',
+      '21': 'Äldreomsorg',
+      '23': 'IFO',
+      '31': 'Administration',
+    };
+
+    // POST query to SCB — returns JSON-stat
+    async function scbFetch(query) {
+      const res = await fetch(SCB_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query, response: { format: 'json' } })
+      });
+      return res.json();
+    }
+
+    // Parse SCB json response into a flat array [{region, verks, year, value}]
+    function parseScb(json) {
+      const rows = [];
+      const dims = json.columns.map(c => c.code);
+      json.data.forEach(d => {
+        const obj = {};
+        dims.forEach((dim, i) => obj[dim] = d.key[i]);
+        obj.value = parseFloat(d.values[0]);
+        rows.push(obj);
+      });
+      return rows;
+    }
+
+    // ── SCB Chart 1: Latest year cost breakdown for Solna (donut/bar) ──
+    async function renderScbChart1() {
+      try {
+        const years = ['2022','2023','2024'];
+        const query = [
+          { code: 'Region',            selection: { filter: 'item', values: ['0163'] } },
+          { code: 'Verksamhetsomrade', selection: { filter: 'item', values: Object.keys(VERKS) } },
+          { code: 'ContentsCode',      selection: { filter: 'item', values: ['OE0107B3'] } }, // Bruttokostnad tkr
+          { code: 'Tid',               selection: { filter: 'item', values: years } },
+        ];
+        const json = await scbFetch(query);
+        const rows = parseScb(json);
+
+        // Latest year per verksamhet
+        const latest = {};
+        rows.forEach(r => {
+          const v = r['Verksamhetsomrade'];
+          if (!latest[v] || r['Tid'] > latest[v].year) {
+            latest[v] = { year: r['Tid'], value: r.value };
+          }
+        });
+
+        const labels = Object.keys(VERKS).map(k => VERKS[k]);
+        const values = Object.keys(VERKS).map(k => (latest[k]?.value ?? 0) / 1000); // Mkr
+
+        document.getElementById('scb-load1').style.display = 'none';
+        document.getElementById('scb-chart1').style.display = 'block';
+
+        new Chart(document.getElementById('scb-chart1'), {
+          type: 'bar',
+          data: {
+            labels,
+            datasets: [{
+              data: values,
+              backgroundColor: [C.accent2, C.accent2, C.accent2, C.accent, C.accent, '#ef4444'],
+              borderRadius: 2,
+            }]
+          },
+          options: {
+            ...baseOptions,
+            plugins: { ...baseOptions.plugins },
+            scales: {
+              ...baseOptions.scales,
+              y: {
+                ...baseOptions.scales.y,
+                ticks: { callback: v => v.toFixed(0) + ' Mkr' }
+              }
+            }
+          }
+        });
+      } catch(e) {
+        console.error('SCB chart1 error:', e);
+        document.getElementById('scb-load1').textContent = 'Data ej tillgänglig';
+      }
+    }
+
+    // ── SCB Chart 2: Cost trend per verksamhet 2015-2024 (multi-line) ──
+    async function renderScbChart2() {
+      try {
+        const query = [
+          { code: 'Region',            selection: { filter: 'item', values: ['0163'] } },
+          { code: 'Verksamhetsomrade', selection: { filter: 'item', values: ['12', '21', '23', '31'] } },
+          { code: 'ContentsCode',      selection: { filter: 'item', values: ['OE0107B3'] } },
+          { code: 'Tid',               selection: { filter: 'item', values: ['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024'] } },
+        ];
+        const json = await scbFetch(query);
+        const rows = parseScb(json);
+
+        const years = [...new Set(rows.map(r => r['Tid']))].sort();
+        const colors = { '12': C.accent2, '21': C.accent, '23': '#ef4444', '31': '#f59e0b' };
+        const names  = { '12': 'Grundskola', '21': 'Äldreomsorg', '23': 'IFO', '31': 'Administration' };
+
+        const datasets = ['12','21','23','31'].map(k => ({
+          label: names[k],
+          data: years.map(y => {
+            const r = rows.find(r => r['Verksamhetsomrade'] === k && r['Tid'] === y);
+            return r ? r.value / 1000 : null;
+          }),
+          borderColor: colors[k],
+          backgroundColor: 'transparent',
+          tension: 0.3,
+          pointRadius: 2,
+        }));
+
+        document.getElementById('scb-load2').style.display = 'none';
+        document.getElementById('scb-chart2').style.display = 'block';
+
+        new Chart(document.getElementById('scb-chart2'), {
+          type: 'line',
+          data: { labels: years, datasets },
+          options: {
+            ...baseOptions,
+            plugins: {
+              ...baseOptions.plugins,
+              legend: {
+                display: true,
+                labels: { color: C.text, font: { size: 10 }, boxWidth: 12 }
+              }
+            },
+            scales: {
+              ...baseOptions.scales,
+              y: { ...baseOptions.scales.y, ticks: { callback: v => v.toFixed(0) + ' Mkr' } }
+            }
+          }
+        });
+      } catch(e) {
+        console.error('SCB chart2 error:', e);
+        document.getElementById('scb-load2').textContent = 'Data ej tillgänglig';
+      }
+    }
+
+    // ── SCB Chart 3: IFO comparison — Solna vs grannar ──
+    async function renderScbChart3() {
+      try {
+        // Region codes: Solna=0163, Stockholm=0180, Sundbyberg=0183, Nacka=0182, Sollentuna=0186
+        const regions = { '0163':'Solna','0180':'Stockholm','0183':'Sundbyberg','0182':'Nacka','0186':'Sollentuna' };
+        const query = [
+          { code: 'Region',            selection: { filter: 'item', values: Object.keys(regions) } },
+          { code: 'Verksamhetsomrade', selection: { filter: 'item', values: ['23'] } }, // IFO
+          { code: 'ContentsCode',      selection: { filter: 'item', values: ['OE0107B9'] } }, // Nettokostnad kr/inv
+          { code: 'Tid',               selection: { filter: 'item', values: ['2024'] } },
+        ];
+        const json = await scbFetch(query);
+        const rows = parseScb(json);
+
+        const labels = Object.values(regions);
+        const values = Object.keys(regions).map(id => {
+          const r = rows.find(r => r['Region'] === id);
+          return r?.value ?? 0;
+        });
+
+        document.getElementById('scb-load3').style.display = 'none';
+        document.getElementById('scb-chart3').style.display = 'block';
+
+        new Chart(document.getElementById('scb-chart3'), {
+          type: 'bar',
+          data: {
+            labels,
+            datasets: [{
+              data: values,
+              backgroundColor: labels.map(l => l === 'Solna' ? C.accent : C.muted),
+              borderRadius: 2,
+            }]
+          },
+          options: { ...baseOptions }
+        });
+      } catch(e) {
+        console.error('SCB chart3 error:', e);
+        document.getElementById('scb-load3').textContent = 'Data ej tillgänglig';
+      }
+    }
+
+    // ── SCB Chart 4: Admin as % of total cost — Solna trend ──
+    async function renderScbChart4() {
+      try {
+        const years = ['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024'];
+        const query = [
+          { code: 'Region',            selection: { filter: 'item', values: ['0163'] } },
+          { code: 'Verksamhetsomrade', selection: { filter: 'item', values: ['00','31'] } }, // 00=Totalt, 31=Admin
+          { code: 'ContentsCode',      selection: { filter: 'item', values: ['OE0107B3'] } },
+          { code: 'Tid',               selection: { filter: 'item', values: years } },
+        ];
+        const json = await scbFetch(query);
+        const rows = parseScb(json);
+
+        const pcts = years.map(y => {
+          const total = rows.find(r => r['Verksamhetsomrade'] === '00' && r['Tid'] === y)?.value;
+          const admin = rows.find(r => r['Verksamhetsomrade'] === '31' && r['Tid'] === y)?.value;
+          return (total && admin) ? +((admin / total) * 100).toFixed(2) : null;
+        });
+
+        document.getElementById('scb-load4').style.display = 'none';
+        document.getElementById('scb-chart4').style.display = 'block';
+
+        new Chart(document.getElementById('scb-chart4'), {
+          type: 'line',
+          data: {
+            labels: years,
+            datasets: [{
+              data: pcts,
+              borderColor: '#f59e0b',
+              backgroundColor: '#f59e0b22',
+              fill: true,
+              tension: 0.3,
+              pointRadius: 3,
+              pointBackgroundColor: '#f59e0b',
+            }]
+          },
+          options: {
+            ...baseOptions,
+            scales: {
+              ...baseOptions.scales,
+              y: { ...baseOptions.scales.y, ticks: { callback: v => v + '%' } }
+            }
+          }
+        });
+      } catch(e) {
+        console.error('SCB chart4 error:', e);
+        document.getElementById('scb-load4').textContent = 'Data ej tillgänglig';
+      }
+    }
+
+    // Init SCB charts
+    renderScbChart1();
+    renderScbChart2();
+    renderScbChart3();
+    renderScbChart4();
+
   </script>
 </body>
 </html>
